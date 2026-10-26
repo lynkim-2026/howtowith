@@ -1,4 +1,4 @@
-// Offline support. The app shell is cached up front and refreshed in the background;
+// Offline support. The app shell is cached up front and refreshed on every online load;
 // audio files are cached on first play (or all at once from the Data screen).
 const SHELL = 'howtowith-shell-v1';
 const AUDIO = 'howtowith-audio-v1';
@@ -68,15 +68,17 @@ async function indexJson(request) {
   }
 }
 
+// Network first so updates show up on the next load; the cache keeps the app working offline.
 async function shell(request) {
   const cache = await caches.open(SHELL);
-  const hit = await cache.match(request, { ignoreSearch: true });
-  const refresh = fetch(request).then((net) => {
+  try {
+    const net = await fetch(request, { cache: 'no-cache' });
     if (net.ok) cache.put(request, net.clone());
     return net;
-  }).catch(() => null);
-  if (hit) { refresh.catch(() => {}); return hit; }
-  return (await refresh) || (request.mode === 'navigate' ? cache.match('index.html') : Response.error());
+  } catch {
+    const hit = await cache.match(request, { ignoreSearch: true });
+    return hit || (request.mode === 'navigate' ? cache.match('index.html') : Response.error());
+  }
 }
 
 self.addEventListener('fetch', (e) => {
