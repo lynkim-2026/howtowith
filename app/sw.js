@@ -85,7 +85,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(request.url);
   if (url.origin !== location.origin) return;
   const path = url.pathname;
-  if (path.endsWith('/audio/index.json')) e.respondWith(indexJson(request));
+  if (path.endsWith('/audio/index.json') || path.endsWith('/data/expressions.json')) e.respondWith(indexJson(request));
   else if (/\/audio\/[^/]+\.(mp3|wav|ogg)$/i.test(path)) e.respondWith(audio(request));
   else e.respondWith(shell(request));
 });

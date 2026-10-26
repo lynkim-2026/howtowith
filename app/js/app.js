@@ -1,5 +1,5 @@
 // Router and bootstrap.
-import { S, load } from './state.js';
+import { S, load, syncPublished } from './state.js';
 import { h, clear, icon, toast } from './ui.js';
 import * as tts from './tts.js';
 import { homeView, afterHome, studyView, afterStudy, listView, statsView, dataView } from './views.js';
@@ -59,6 +59,10 @@ async function boot() {
     return;
   }
   await tts.loadIndex();
+  try {
+    const added = await syncPublished();
+    if (added) toast(`PC에서 정리한 새 표현 ${added}개를 가져왔어요`);
+  } catch { /* offline or not published yet */ }
   window.addEventListener('hashchange', render);
   render();
 }

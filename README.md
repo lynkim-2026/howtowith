@@ -8,13 +8,24 @@
 - **음성**: PC에서 VoiceStudio로 만든 mp3 재생(1× / 0.8× / 반복 / 자동재생 / 오프라인), 없으면 휴대폰 기본 TTS
 - **백업**: JSON 백업/복원 (브라우저 데이터 삭제에 대비)
 
+## 매일 쓰는 방법 (PC에서 정리 → 앱이 자동 반영)
+
+1. PC에서 `Howtowith.xlsx`에 문장을 추가하고 저장합니다.
+2. 이 폴더에서 `npm run sync -- Howtowith.xlsx` 실행 (엑셀 → `app/data/expressions.json` 변환 후 commit/push).
+3. 몇 분 뒤 Pages 배포가 끝나면, 휴대폰에서 앱을 열 때 **새 표현만 자동 추가**됩니다 (기존 학습 기록 유지, 앱에서 삭제한 표현은 다시 들어오지 않음).
+
+변환만 하려면 `npm run publish -- Howtowith.xlsx`. 앱의 "엑셀 업로드"는 보조 수단으로 남아 있습니다.
+
+> 주의: 이 방식은 문장(한글·영어)이 GitHub Pages에 올라가므로 저장소가 public이면 누구나 볼 수 있습니다.
+
 ## 폴더
 
 ```
 app/        배포되는 앱 (GitHub Pages가 이 폴더를 그대로 서비스)
   vendor/   ts-fsrs, read-excel-file (라이선스 파일 포함, CDN 사용 안 함)
   audio/    생성된 음성 + index.json (표현 키 → 파일)
-scripts/    make-audio.mjs (PC에서 음성 생성)
+scripts/    publish-data.mjs (엑셀 → 앱 데이터), make-audio.mjs (PC에서 음성 생성)
+  data/     expressions.json (앱이 시작할 때 읽는 표현 목록)
 tests/      로직 테스트 (npm test)
 ```
 

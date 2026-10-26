@@ -7,7 +7,9 @@
     "test": "node tests/logic.test.mjs && node tests/srs.test.mjs",
     "start": "npx --yes serve@14 -l 8080 app",
     "audio": "node scripts/make-audio.mjs",
-    "audit": "npm audit"
+    "audit": "npm audit",
+    "publish": "node scripts/publish-data.mjs",
+    "sync": "node scripts/publish-data.mjs --push"
   },
   "keywords": [],
   "author": "",

@@ -28,7 +28,7 @@ export function homeView() {
       h('h1', { class: 'page-title' }, 'Howtowith'),
       h('div', { class: 'empty' },
         h('h2', null, '아직 표현이 없어요'),
-        h('p', null, '매일 정리하는 엑셀 파일을 올리면 바로 복습을 시작할 수 있어요.'),
+        h('p', null, 'PC에서 엑셀을 정리해 반영하면 앱을 열 때 자동으로 들어와요. 지금 바로 쓰려면 엑셀을 직접 올려도 돼요.'),
         h('a', { class: 'btn primary', href: '#/data' }, icon('upload'), '엑셀 올리기')));
   }
   const q = todayQueue(S.cards, { newLimit: S.settings.newPerDay, newToday: newToday() });
