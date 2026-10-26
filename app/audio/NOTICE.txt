@@ -1,0 +1,3 @@
+These audio files were generated locally with VoiceStudio (AGPL-3.0, https://github.com/debpalash/VoiceStudio)
+using the OmniVoice model (k2-fsa/OmniVoice; code Apache-2.0, weights CC-BY-NC, plus Higgs Audio / Llama terms).
+For personal, non-commercial study use only.
