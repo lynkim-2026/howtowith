@@ -42,17 +42,16 @@ export function sessionView(mode, cat) {
   const bar = h('i');
   const count = h('span', { class: 'count num' });
   const stage = h('div');
-  const loopBtn = h('button', { class: 'icon-btn', type: 'button', 'aria-label': '반복 듣기', 'aria-pressed': S.settings.repeat > 1, onclick: toggleLoop }, icon('repeat'));
   const root = h('div', { class: 'view' },
     h('div', { class: 's-top' },
       h('a', { class: 'icon-btn', href: '#/home', 'aria-label': '학습 종료' }, icon('close')),
-      h('div', { class: 'bar' }, bar), count, loopBtn),
+      h('div', { class: 'bar' }, bar), count),
     stage);
 
-  function toggleLoop() {
+  function toggleLoop(e) {
     const on = S.settings.repeat > 1;
     S.settings = { ...S.settings, repeat: on ? 1 : 3 };
-    loopBtn.setAttribute('aria-pressed', String(!on));
+    e.currentTarget.setAttribute('aria-pressed', String(!on));
   }
 
   const say = (rec, rateOverride) => tts.speak({ key: rec.key, text: rec.en }, {
@@ -62,7 +61,8 @@ export function sessionView(mode, cat) {
   function listenRow(rec) {
     return h('div', { class: 'listen' },
       h('button', { class: 'btn', type: 'button', onclick: () => say(rec, 1) }, icon('speaker'), '듣기'),
-      h('button', { class: 'btn quiet', type: 'button', onclick: () => say(rec, 0.8) }, '0.8×'));
+      h('button', { class: 'btn', type: 'button', onclick: () => say(rec, 0.8) }, '0.8×'),
+      h('button', { class: 'btn', type: 'button', 'aria-pressed': S.settings.repeat > 1, onclick: toggleLoop }, icon('repeat'), '반복'));
   }
 
   function progress() {

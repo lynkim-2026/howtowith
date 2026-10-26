@@ -4,7 +4,7 @@ Paper & ink. An Operate-mode study tool for one-handed phone use, light by defau
 
 ## Color
 
-Warm paper neutrals tinted toward amber (never pure white/black); one accent, vermilion, reserved for the primary action, the active tab and "due" signals. Rating colors are muted semantic tints: Again red, Hard amber, Good green, Easy blue. All tokens are OKLCH custom properties in `app/css/style.css`; the dark theme redefines the same names.
+Warm paper neutrals tinted toward amber (never pure white/black); one accent, vermilion, reserved for the primary action, the active tab and "due" signals. Rating buttons are neutral surfaces; only the label carries meaning (Again red, Hard amber, Good green, Easy blue), so the study card stays the loudest thing on screen. All tokens are OKLCH custom properties in `app/css/style.css`; the dark theme redefines the same names.
 
 ## Typography
 
@@ -12,7 +12,7 @@ English sentences are the content, set in Newsreader (self-hosted variable serif
 
 ## Layout
 
-One column, max 560px, 20px gutters, bottom tab bar (홈 · 복습 · 목록 · 통계 · 관리) with safe-area padding. Lists are hairline-separated rows, not stacked cards; the only elevated surface is the study card. Study sessions hide the tab bar.
+One column, max 560px, 20px gutters, bottom tab bar (홈 · 복습 · 목록 · 통계 · 관리) with safe-area padding. Lists are hairline-separated rows, not stacked cards; status is quiet meta text under the sentence, not a badge. Listening controls (듣기 · 0.8× · 반복) sit with the sentence as text buttons. Settings are folded into disclosure rows so the Data screen stays short; there is one primary action per screen. Study sessions hide the tab bar.
 
 ## Motion
 

@@ -37,8 +37,8 @@ export function homeView() {
   const days = reviewDays(S.reviews);
   const stale = !S.lastBackup || Date.now() - S.lastBackup > 7 * 86400000;
   return h('div', { class: 'view' },
-    h('h1', { class: 'page-title' }, 'Howtowith'),
-    h('p', { class: 'page-sub' }, new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })),
+    h('p', { class: 'brand' }, 'Howtowith'),
+    h('h1', { class: 'page-title' }, new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })),
     h('div', { class: 'today' },
       left
         ? h('p', { class: 'big num' }, `${left}개`, h('small', null, `복습 ${q.due.length} · 새 표현 ${q.fresh.length}`))
@@ -53,7 +53,7 @@ export function homeView() {
       h('div', null, h('dt', null, '연속 학습'), h('dd', { class: 'num' }, `${streak(days)}일`)),
       h('div', null, h('dt', null, '학습 완료율'), h('dd', { class: 'num' }, pct(o.completion))),
       h('div', null, h('dt', null, '익숙한 표현'), h('dd', { class: 'num' }, `${o.mastered}개`))),
-    stale ? h('p', { class: 'notice' }, '학습 기록을 백업해 두세요. 브라우저 데이터를 지우면 기록이 사라져요. ', h('a', { href: '#/data' }, '백업하기')) : null);
+    stale ? h('p', { class: 'notice' }, '학습 기록이 아직 백업되지 않았어요. ', h('a', { href: '#/data' }, '백업하기')) : null);
 }
 
 export function afterHome(root) {
@@ -102,10 +102,10 @@ export function afterStudy(root) {
 const listState = { q: '', cat: '', limit: 100 };
 
 function statusBadge(c) {
-  if (isNew(c)) return h('span', { class: 'badge' }, '새 표현');
-  if (isDue(c)) return h('span', { class: 'badge due' }, '복습');
-  if (isMastered(c)) return h('span', { class: 'badge mastered' }, '익숙');
-  return h('span', { class: 'badge' }, fmtDue(c.card.due));
+  if (isNew(c)) return h('p', { class: 'stat' }, '새 표현');
+  if (isDue(c)) return h('p', { class: 'stat due' }, '복습할 차례');
+  if (isMastered(c)) return h('p', { class: 'stat mastered' }, '익숙해요');
+  return h('p', { class: 'stat' }, `다음 복습 ${fmtDue(c.card.due).replace(/ \(.*\)$/, '')}`);
 }
 
 export function listView() {
@@ -137,8 +137,7 @@ export function listView() {
     const li = h('li', null);
     const head = h('div', { class: 'row item' },
       h('button', { class: 'row grow', type: 'button', 'aria-expanded': 'false', onclick: toggle },
-        h('div', { class: 'grow' }, h('p', { class: 'en', lang: 'en' }, c.en), h('p', { class: 'ko', lang: 'ko' }, c.ko)),
-        statusBadge(c)),
+        h('div', { class: 'grow' }, h('p', { class: 'en', lang: 'en' }, c.en), h('p', { class: 'ko', lang: 'ko' }, c.ko), statusBadge(c))),
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': '영어 듣기', onclick: () => speakCard(c) }, icon('speaker')));
     li.append(head);
     function toggle(e) {
@@ -267,7 +266,7 @@ export function dataView() {
     try { if (navigator.storage?.persist) await navigator.storage.persist(); } catch { /* optional */ }
     try {
       const ok = await navigator.storage?.persisted?.();
-      storageStatus.textContent = ok ? '브라우저가 이 앱의 데이터를 보존하도록 허용했어요.' : '브라우저가 저장 공간 정리 시 데이터를 지울 수 있어요. 주기적으로 백업하세요.';
+      storageStatus.textContent = ok ? '' : '브라우저가 저장 공간을 정리할 때 데이터가 지워질 수 있어요.';
     } catch { /* ignore */ }
   }
 
@@ -363,10 +362,11 @@ export function dataView() {
     h('section', { class: 'group' },
       h('h2', null, '백업과 복원'),
       h('p', null, '학습 기록은 이 기기의 브라우저에만 저장돼요. 파일로 백업해 두면 기기를 바꾸거나 데이터가 지워져도 되살릴 수 있어요.'),
-      h('button', { class: 'btn primary block', type: 'button', onclick: backup }, icon('download'), '백업 파일 저장'),
+      h('button', { class: 'btn block', type: 'button', onclick: backup }, icon('download'), '백업 파일 저장'),
       h('label', { class: 'btn block', for: 'restore' }, '백업 파일에서 복원'), restoreIn, backupInfo, storageStatus),
-    h('section', { class: 'group' },
-      h('h2', null, '영어 음성'),
+    h('details', { class: 'fold' },
+      h('summary', null, '영어 음성'),
+      h('div', { class: 'body' },
       audioStatus,
       tts.audioCount() ? h('button', { class: 'btn block', type: 'button', onclick: (e) => cacheAudio(e.currentTarget) }, '음성 오프라인 저장') : null,
       tts.audioCount() ? h('p', { class: 'hint' }, '음성: VoiceStudio(AGPL-3.0) · OmniVoice 모델(CC-BY-NC, 비상업 개인 학습용)') : null,
@@ -375,13 +375,14 @@ export function dataView() {
       h('div', { class: 'switch' }, h('label', { for: 'auto' }, '자동 재생'),
         h('input', { id: 'auto', type: 'checkbox', checked: S.settings.autoSpeak, onchange: (e) => updateSettings({ autoSpeak: e.target.checked }) })),
       voices.length ? setting('휴대폰 기본 음성 (파일이 없을 때)', h('select', { onchange: (e) => updateSettings({ voiceURI: e.target.value }) },
-        voices.map((v) => h('option', { value: v.voiceURI, selected: v.voiceURI === S.settings.voiceURI }, `${v.name} (${v.lang})`)))) : null),
-    h('section', { class: 'group' },
-      h('h2', null, '학습 설정'),
+        voices.map((v) => h('option', { value: v.voiceURI, selected: v.voiceURI === S.settings.voiceURI }, `${v.name} (${v.lang})`)))) : null)),
+    h('details', { class: 'fold' },
+      h('summary', null, '학습 설정'),
+      h('div', { class: 'body' },
       setting('하루 새 표현 수', h('select', { onchange: (e) => updateSettings({ newPerDay: Number(e.target.value) }) },
         [0, 5, 10, 15, 20, 30, 50].map((n) => h('option', { value: n, selected: n === S.settings.newPerDay }, `${n}개`)))),
       setting('화면 테마', segOf('theme', [['auto', '자동'], ['light', '밝게'], ['dark', '어둡게']])),
-      installBtn),
+      installBtn)),
     h('section', { class: 'group' },
       h('h2', null, '모든 데이터 삭제'),
       h('p', null, '표현, 학습 기록, 설정을 이 기기에서 모두 지워요. 먼저 백업하세요.'),
