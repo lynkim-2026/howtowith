@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { newCardState, grade, preview, Rating, State, todayQueue, weakQueue, categoryQueue, isDue, dayKey } from '../app/js/srs.js';
-import { streak, bestStreak, dailyCounts, retention, overview } from '../app/js/stats.js';
+import { streak, bestStreak, dailyCounts, retention, overview, heatmap, accuracySeries, forecast, stages } from '../app/js/stats.js';
 import { serialize, parseBackup, pickNewer } from '../app/js/backup.js';
 
 const t0 = new Date(2026, 0, 10, 9, 0, 0);
@@ -45,6 +45,24 @@ const reviews = [{ day: day(10), rating: 3, prevState: 0 }, { day: day(10), rati
 assert.equal(dailyCounts(reviews, 3, t0).map((d) => d.count).join(), '0,1,2');
 assert.equal(retention(reviews), 0.5);
 assert.equal(overview(cards, t0).total, 4);
+
+// Dashboards
+const hm = heatmap(reviews, 5, t0);
+assert.equal(hm.length, 35);
+assert.equal(hm.filter((c) => c.future).length, 1); // t0 is a Saturday: only that Sunday is still ahead
+assert.equal(hm.find((c) => c.day === day(10)).count, 2);
+assert.equal(hm.find((c) => c.day === day(10)).level, 4);
+const acc = accuracySeries([{ day: day(10), rating: 3, prevState: 2 }, { day: day(10), rating: 1, prevState: 2 }, { day: day(10), rating: 4, prevState: 0 }], 3, t0);
+assert.equal(acc[2].rate, 0.5);
+assert.equal(acc[2].total, 2); // first-time reviews are excluded
+assert.equal(acc[0].rate, null);
+const fc = forecast(cards, 7, t0);
+assert.equal(fc.length, 7);
+assert.equal(fc[0].count, 2); // both reviewed cards are overdue -> today
+assert.equal(fc.reduce((a, d) => a + d.count, 0), 2);
+const sg = stages(cards);
+assert.equal(sg.fresh, 2);
+assert.equal(sg.fresh + sg.learning + sg.review + sg.mastered, 4);
 
 // Backup round-trip and hostile input
 const text = serialize({ cards, reviews: reviews.map((x, i) => ({ ...x, key: 'a', ts: i, mode: 'today' })), settings: { rate: 9, theme: 'x' } });

@@ -12,7 +12,7 @@ English sentences are the content, set in Newsreader (self-hosted variable serif
 
 ## Layout
 
-One column, max 560px, 20px gutters, bottom tab bar (홈 · 복습 · 목록 · 통계 · 관리) with safe-area padding. Lists are hairline-separated rows, not stacked cards; status is quiet meta text under the sentence, not a badge. Listening controls (듣기 · 0.8× · 반복) sit with the sentence as text buttons. Settings are folded into disclosure rows so the Data screen stays short; there is one primary action per screen. Study sessions hide the tab bar.
+One column, max 560px, 20px gutters, bottom tab bar (홈 · 복습 · 목록 · 통계 · 관리) with safe-area padding. Lists are hairline-separated rows, not stacked cards; status is quiet meta text under the sentence, not a badge. Listening controls (듣기 · 0.8× · 반복) sit with the sentence as text buttons. Settings are folded into disclosure rows so the Data screen stays short; there is one primary action per screen. Study sessions hide the tab bar. The home screen is one statement (today's study and streak) and one button; choosing how to study happens in a bottom sheet after the tap, not in always-visible menus. The Study tab is a few icon tiles, not a text list. Stats are three dashboards: consistency (5-week calendar), memory (daily remember-rate line), and what is ahead (7-day forecast and stage mix).
 
 ## Motion
 

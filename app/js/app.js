@@ -6,7 +6,7 @@ import { homeView, afterHome, studyView, afterStudy, listView, statsView, dataVi
 import { sessionView } from './session.js';
 
 const TABS = [
-  ['home', '홈', 'home'], ['study', '복습', 'cards'], ['list', '목록', 'list'], ['stats', '통계', 'chart'], ['data', '관리', 'data'],
+  ['home', '홈', 'home'], ['study', '학습', 'cards'], ['list', '목록', 'list'], ['stats', '통계', 'chart'], ['data', '관리', 'data'],
 ];
 
 const appEl = document.getElementById('app');

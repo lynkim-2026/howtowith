@@ -7,10 +7,10 @@ import { compareAnswer } from './text.js';
 import { streak, reviewDays } from './stats.js';
 
 export const MODES = {
-  today: { title: '오늘의 복습' },
+  today: { title: '오늘의 학습' },
   'ko-en': { title: '한글 → 영어', dir: 'ko-en' },
   'en-ko': { title: '영어 → 한국어', dir: 'en-ko' },
-  random: { title: '랜덤 복습', dir: 'mixed' },
+  random: { title: '랜덤 학습' },
   weak: { title: '틀린 표현 집중' },
   cat: { title: '카테고리 학습' },
 };
@@ -152,9 +152,9 @@ export function sessionView(mode, cat) {
     clear(stage, n === 0 && total === 0
       ? h('div', { class: 'empty' }, h('h2', null, '학습할 표현이 없어요'),
         h('p', null, mode === 'weak' ? '어려워한 표현이 아직 없어요. 잘하고 있어요!' : '엑셀을 올리면 표현이 여기 나타나요.'),
-        h('a', { class: 'btn primary', href: mode === 'weak' ? '#/study' : '#/data' }, mode === 'weak' ? '복습 메뉴로' : '엑셀 올리기'))
+        h('a', { class: 'btn primary', href: mode === 'weak' ? '#/study' : '#/data' }, mode === 'weak' ? '학습 메뉴로' : '엑셀 올리기'))
       : h('div', { class: 'summary' },
-        h('h1', null, `${n}개 표현을 복습했어요`),
+        h('h1', null, `${n}개 표현을 학습했어요`),
         h('p', { class: 'page-sub' }, `기억한 비율 ${n ? Math.round((good / n) * 100) : 0}% · 연속 ${streak(days)}일째`),
         h('dl', { class: 'kv' }, GRADES.flatMap((g) => [h('dt', null, GRADE_LABEL[g]), h('dd', { class: 'num' }, `${tally[g]}개`)])),
         h('div', { class: 'col-actions' },

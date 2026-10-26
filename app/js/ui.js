@@ -41,6 +41,8 @@ const PATHS = {
   upload: 'M12 16V4M7 9l5-5 5 5M5 20h14',
   download: 'M12 4v12M7 11l5 5 5-5M5 20h14',
   check: 'm5 12.5 4.5 4.5L19 7.5',
+  shuffle: 'M4 7h3c3 0 4 2 5 5s2 5 5 5h3M4 17h3c1.2 0 2.1-.4 2.8-1.1M14.2 8.1C14.9 7.4 15.8 7 17 7h3M17 4l3 3-3 3M17 14l3 3-3 3',
+  flag: 'M6 20V4M6 5h11l-2.5 4L17 13H6',
 };
 
 export function icon(name) {
@@ -75,6 +77,23 @@ export function ask(title, message, choices) {
       h('p', null, message),
       h('div', { class: 'actions' }, choices.map((c) =>
         h('button', { class: `btn ${c.kind || ''}`, type: 'button', onclick: () => { dlg.close(); resolve(c.value); } }, c.label))));
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(null); });
+    document.body.append(dlg);
+    dlg.showModal();
+  });
+}
+
+// Bottom sheet with a few large choices. Resolves the chosen value, or null when dismissed.
+export function sheet(title, options, current) {
+  return new Promise((resolve) => {
+    const dlg = h('dialog', { class: 'sheet', 'aria-label': title, tabindex: '-1', autofocus: true },
+      h('div', { class: 'body' },
+        h('h2', null, title),
+        h('div', { class: 'choices' }, options.map((o) =>
+          h('button', { class: 'choice', type: 'button', 'aria-pressed': o.value === current, onclick: () => { resolve(o.value); dlg.close(); } },
+            h('span', { class: 't' }, o.label),
+            o.desc ? h('span', { class: 'd' }, o.desc) : null)))));
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     dlg.addEventListener('close', () => { dlg.remove(); resolve(null); });
     document.body.append(dlg);
     dlg.showModal();

@@ -1,23 +1,28 @@
 // The five tab screens: home, study hub, list, stats, data.
 import { S, reload, updateSettings, addExpressions, removeCard, markBackup, newToday, reviewedToday } from './state.js';
 import * as db from './db.js';
-import { h, clear, icon, toast, ask, confirmAction, fmtDue, fmtDate } from './ui.js';
+import { h, clear, icon, toast, ask, sheet, confirmAction, fmtDue, fmtDate } from './ui.js';
 import * as tts from './tts.js';
 import { todayQueue, weakQueue, isNew, isDue, isMastered, State, dayKey } from './srs.js';
-import { overview, streak, bestStreak, reviewDays, dailyCounts, retention, categoryProgress } from './stats.js';
+import { overview, streak, bestStreak, reviewDays, retention, categoryProgress, heatmap, accuracySeries, forecast, stages } from './stats.js';
 import { readWorkbook, extractSheets } from './importer.js';
 import { serialize, parseBackup } from './backup.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 const speakCard = (c) => tts.speak({ key: c.key, text: c.en }, { rate: S.settings.rate, repeat: 1, voiceURI: S.settings.voiceURI });
 
-function directionSeg(onChange) {
-  const opts = [['ko-en', '한 → 영'], ['en-ko', '영 → 한'], ['mixed', '섞어서']];
-  const seg = h('div', { class: 'seg', role: 'group', 'aria-label': '출제 방향' });
-  const paint = () => clear(seg, opts.map(([v, label]) =>
-    h('button', { type: 'button', 'aria-pressed': S.settings.direction === v, onclick: async () => { await updateSettings({ direction: v }); paint(); onChange?.(); } }, label)));
-  paint();
-  return seg;
+const DIRECTIONS = [
+  { value: 'ko-en', label: '한글 → 영어', desc: '한국어를 보고 영어를 떠올려요' },
+  { value: 'en-ko', label: '영어 → 한국어', desc: '영어를 보고 뜻을 떠올려요' },
+  { value: 'mixed', label: '섞어서', desc: '문장마다 방향이 달라져요' },
+];
+
+// Ask how to study, remember the answer, then start the session.
+async function chooseAndStart(mode) {
+  const dir = await sheet('어떻게 학습할까요?', DIRECTIONS, S.settings.direction);
+  if (!dir) return;
+  await updateSettings({ direction: dir });
+  location.hash = `#/session/${mode}`;
 }
 
 /* ---------------- home ---------------- */
@@ -33,21 +38,18 @@ export function homeView() {
   const q = todayQueue(S.cards, { newLimit: S.settings.newPerDay, newToday: newToday() });
   const left = q.queue.length;
   const done = reviewedToday();
-  const days = reviewDays(S.reviews);
+  const streakDays = streak(reviewDays(S.reviews));
   const stale = S.reviews.length > 0 && (!S.lastBackup || Date.now() - S.lastBackup > 7 * 86400000);
+  const title = done ? (left ? `오늘 ${done}개 학습` : '오늘 학습 끝') : '오늘 학습 전';
+  const sub = [left ? `남은 표현 ${left}개` : (done ? '내일 또 만나요' : '쉬어가는 날이에요'), streakDays ? `연속 ${streakDays}일째` : ''].filter(Boolean).join(' · ');
   return h('div', { class: 'view home' },
-    h('h1', { class: 'hero' }, left ? `오늘 ${left}개` : '오늘 복습 끝'),
-    h('p', { class: 'hero-sub' }, left
-      ? `복습 ${q.due.length} · 새 표현 ${q.fresh.length}`
-      : (done ? `${done}번 복습했어요` : '쉬어가는 날이에요')),
+    h('p', { class: 'date' }, new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })),
+    h('h1', { class: 'hero' }, title),
+    h('p', { class: 'hero-sub' }, sub),
     done && left
       ? h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round((done / (done + left)) * 100), 'aria-label': '오늘 진행률' }, h('i', { id: 'todaybar' }))
       : null,
-    left
-      ? h('a', { class: 'btn primary block cta', href: '#/session/today' }, '복습 시작')
-      : h('a', { class: 'btn block cta', href: '#/session/random' }, '랜덤 복습으로 더 하기'),
-    directionSeg(),
-    h('p', { class: 'meta' }, `연속 ${streak(days)}일 · 완료 ${pct(o.completion)}`),
+    h('button', { class: `btn block cta${left ? ' primary' : ''}`, type: 'button', onclick: () => chooseAndStart(left ? 'today' : 'random') }, left ? '학습하기' : '더 학습하기'),
     stale ? h('p', { class: 'meta' }, '아직 백업하지 않았어요 · ', h('a', { href: '#/data' }, '백업하기')) : null);
 }
 
@@ -64,24 +66,26 @@ export function studyView() {
   const cards = S.cards;
   const q = todayQueue(cards, { newLimit: S.settings.newPerDay, newToday: newToday() });
   const weak = weakQueue(cards).length;
-  const link = (href, title, meta, hot) => h('li', null,
-    h('a', { class: 'row', href },
-      h('span', { class: 'grow t' }, title),
-      meta ? h('span', { class: `side${hot ? ' hot' : ''}` }, meta) : null,
-      h('span', { class: 'chev' }, icon('chevron'))));
+  const left = q.queue.length;
+  const tile = (href, glyph, label, count) => h('a', { class: 'tile', href, 'aria-label': label },
+    count ? h('span', { class: 'count num' }, String(count)) : null,
+    h('span', { class: 'glyph', 'aria-hidden': 'true' }, glyph),
+    h('span', { class: 'label' }, label));
   const cats = categoryProgress(cards);
   return h('div', { class: 'view' },
-    h('h1', { class: 'page-title' }, '복습'),
-    h('ul', { class: 'rows' },
-      link('#/session/today', '오늘의 복습', q.queue.length ? `${q.queue.length}개` : '', true),
-      link('#/session/ko-en', '한글 → 영어'),
-      link('#/session/en-ko', '영어 → 한국어'),
-      link('#/session/random', '랜덤'),
-      link('#/session/weak', '틀린 표현 집중', weak ? `${weak}개` : '')),
+    h('h1', { class: 'page-title' }, '학습'),
+    h('button', { class: 'btn primary block cta-lg', type: 'button', onclick: () => chooseAndStart(left ? 'today' : 'random') },
+      h('span', null, '오늘의 학습'), left ? h('span', { class: 'num' }, `${left}개`) : icon('chevron')),
+    h('div', { class: 'tiles' },
+      tile('#/session/ko-en', '가→A', '한글 → 영어'),
+      tile('#/session/en-ko', 'A→가', '영어 → 한국어'),
+      tile('#/session/random', icon('shuffle'), '랜덤'),
+      tile('#/session/weak', icon('flag'), '틀린 표현', weak)),
     cats.length ? h('div', { class: 'section' },
       h('h2', null, '카테고리'),
-      h('ul', { class: 'rows' }, cats.map((c) =>
-        link(`#/session/cat/${encodeURIComponent(c.category)}`, c.category, c.due ? `복습 ${c.due}` : `${c.learned}/${c.total}`, !!c.due)))) : null);
+      h('div', { class: 'pills' }, cats.map((c) =>
+        h('a', { class: `pill${c.due ? ' hot' : ''}`, href: `#/session/cat/${encodeURIComponent(c.category)}` },
+          h('span', { class: 'name' }, c.category), h('span', { class: 'num' }, c.due ? `${c.due}` : `${c.learned}/${c.total}`))))) : null);
 }
 
 export function afterStudy() {}
@@ -162,37 +166,71 @@ export function listView() {
 }
 
 /* ---------------- stats ---------------- */
+const SVG = 'http://www.w3.org/2000/svg';
+const svg = (tag, attrs) => { const e = document.createElementNS(SVG, tag); for (const [k, x] of Object.entries(attrs || {})) e.setAttribute(k, String(x)); return e; };
+const DAY = ['일', '월', '화', '수', '목', '금', '토'];
+
+// Line chart of the daily remember-rate. Days without reviews are skipped, not drawn as 0%.
+function accuracyChart(series) {
+  const W = 320, H = 120, pad = 6;
+  const x = (i) => pad + (i * (W - pad * 2)) / (series.length - 1);
+  const y = (r) => H - pad - r * (H - pad * 2);
+  const root = svg('svg', { viewBox: `0 0 ${W} ${H}`, class: 'line', role: 'img', 'aria-label': '일별 기억 성공률' });
+  for (const g of [0, 0.5, 1]) root.append(svg('line', { x1: 0, x2: W, y1: y(g), y2: y(g), class: 'grid' }));
+  const pts = series.map((s, i) => (s.rate == null ? null : [x(i), y(s.rate)])).filter(Boolean);
+  if (pts.length > 1) root.append(svg('polyline', { points: pts.map((p) => p.join(',')).join(' '), class: 'trace' }));
+  for (const p of pts) root.append(svg('circle', { cx: p[0], cy: p[1], r: 3.5, class: 'dot' }));
+  return root;
+}
+
 export function statsView() {
   const o = overview(S.cards);
   const days = reviewDays(S.reviews);
-  const daily = dailyCounts(S.reviews, 14);
-  const max = Math.max(1, ...daily.map((d) => d.count));
+  const cells = heatmap(S.reviews, 5);
+  const weekTotal = cells.slice(-7).reduce((a, c) => a + c.count, 0);
+  const activeDays = cells.filter((c) => c.count).length;
+  const series = accuracySeries(S.reviews, 14);
   const ret = retention(S.reviews);
-  const learning = S.cards.filter((c) => c.card.state === State.Learning || c.card.state === State.Relearning).length;
-  const review = S.cards.filter((c) => c.card.state === State.Review && !isMastered(c)).length;
+  const plan = forecast(S.cards, 7);
+  const maxPlan = Math.max(1, ...plan.map((d) => d.count));
+  const stage = stages(S.cards);
+  const parts = [['새', stage.fresh, 'var(--line)'], ['학습 중', stage.learning, 'var(--hard)'], ['복습', stage.review, 'var(--easy)'], ['익숙', stage.mastered, 'var(--good)']];
   const cats = categoryProgress(S.cards);
-  const total7 = daily.slice(-7).reduce((a, d) => a + d.count, 0);
-  const label = (d) => `${d.date.getMonth() + 1}/${d.date.getDate()}`;
-  const bar = h('i');
-  requestAnimationFrame(() => { bar.style.width = pct(o.completion); });
+  const dayLabel = (d, i) => (i === 0 ? '오늘' : DAY[d.date.getDay()]);
+
+  const heat = h('div', { class: 'heat', role: 'img', 'aria-label': `최근 5주 중 ${activeDays}일 학습` },
+    cells.map((c) => h('i', { class: `l${c.future ? 'x' : c.level}`, title: `${c.day} · ${c.count}번` })));
+  const dow = h('div', { class: 'dow', 'aria-hidden': 'true' }, ['월', '화', '수', '목', '금', '토', '일'].map((d) => h('span', null, d)));
+  const stack = h('div', { class: 'stack', role: 'img', 'aria-label': parts.map(([l, n]) => `${l} ${n}개`).join(', ') },
+    parts.map(([, n, c]) => { const i = h('i'); i.style.setProperty('--f', String(n)); i.style.setProperty('background', c); return i; }));
+
   return h('div', { class: 'view' },
-    h('h1', { class: 'hero' }, `연속 ${streak(days)}일`),
-    h('p', { class: 'hero-sub' }, `최장 ${bestStreak(days)}일${ret == null ? '' : ` · 기억 성공률 ${pct(ret)}`}`),
-    h('div', { class: 'section' },
-      h('h2', null, '최근 14일'),
-      h('div', { class: 'chart', role: 'img', 'aria-label': `최근 7일 ${total7}번 복습` },
-        daily.map((d) => {
-          const col = h('div', { class: `col${d.count ? '' : ' zero'}`, title: `${d.day} · ${d.count}번` }, h('i'));
-          col.firstChild.style.setProperty('--h', `${Math.round((d.count / max) * 100)}%`);
+    h('h1', { class: 'page-title' }, '통계'),
+
+    h('section', { class: 'dash' },
+      h('div', { class: 'dash-head' }, h('h2', null, '꾸준함'), h('p', { class: 'big num' }, `연속 ${streak(days)}일`)),
+      h('div', { class: 'cal' }, dow, heat),
+      h('p', { class: 'meta' }, `이번 주 ${weekTotal}번 · 최장 ${bestStreak(days)}일`)),
+
+    h('section', { class: 'dash' },
+      h('div', { class: 'dash-head' }, h('h2', null, '기억력'), h('p', { class: 'big num' }, ret == null ? '-' : pct(ret))),
+      ret == null ? h('p', { class: 'meta' }, '두 번째 학습부터 그래프가 나타나요.') : accuracyChart(series),
+      ret == null ? null : h('p', { class: 'meta' }, '최근 14일 · 기억한 비율 (좋음+쉬움)')),
+
+    h('section', { class: 'dash' },
+      h('div', { class: 'dash-head' }, h('h2', null, '앞으로 7일'), h('p', { class: 'big num' }, `${plan.reduce((a, d) => a + d.count, 0)}개`)),
+      h('div', { class: 'chart', role: 'img', 'aria-label': '앞으로 7일 학습 예정 개수' },
+        plan.map((d) => {
+          const col = h('div', { class: `col${d.count ? '' : ' zero'}`, title: `${d.count}개` }, h('i'));
+          col.firstChild.style.setProperty('--h', `${Math.round((d.count / maxPlan) * 100)}%`);
           return col;
         })),
-      h('div', { class: 'axis' }, daily.map((d, i) => h('span', null, [0, 6, 13].includes(i) ? label(d) : '')))),
-    h('div', { class: 'section' },
-      h('h2', null, `학습 완료율 ${pct(o.completion)}`),
-      h('div', { class: 'bar' }, bar),
-      h('p', { class: 'meta' }, `새 ${o.fresh} · 학습 중 ${learning} · 복습 ${review} · 익숙 ${o.mastered}`)),
-    cats.length > 1 ? h('div', { class: 'section' },
-      h('h2', null, '카테고리'),
+      h('div', { class: 'axis' }, plan.map((d, i) => h('span', null, dayLabel(d, i)))),
+      stack,
+      h('ul', { class: 'legend' }, parts.map(([l, n, c]) => { const li = h('li', null, `${l} ${n}`); li.style.setProperty('--c', c); return li; }))),
+
+    cats.length > 1 ? h('section', { class: 'dash' },
+      h('div', { class: 'dash-head' }, h('h2', null, '카테고리')),
       h('dl', { class: 'kv' }, cats.flatMap((c) => [h('dt', null, c.category), h('dd', { class: 'num' }, `${c.learned}/${c.total}`)]))) : null);
 }
 

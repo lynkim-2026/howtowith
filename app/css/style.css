@@ -346,3 +346,69 @@ dialog .actions { display: flex; gap: 8px; justify-content: flex-end; }
 .axis span { min-height: 1em; }
 .row .chev { display: flex; }
 .bar + .meta { margin-top: 10px; }
+
+/* ---------- home + bottom sheet ---------- */
+.date { margin: 24px 0 0; color: var(--ink-3); font-size: 1rem; }
+.hero { margin-top: 8px; }
+button.row { cursor: pointer; font: inherit; color: inherit; }
+dialog.sheet {
+  position: fixed; inset: auto 0 0 0; margin: 0 auto; padding: 0; width: 100%; max-width: 560px;
+  border-radius: 24px 24px 0 0; background: var(--surface); color: var(--ink);
+  animation: sheet 340ms var(--ease) both;
+}
+dialog.sheet::backdrop { animation: fade 240ms ease-out both; }
+dialog.sheet .body { padding: 22px 20px calc(16px + env(safe-area-inset-bottom)); }
+dialog.sheet h2 { margin: 0 0 8px; font-size: 1.125rem; }
+.choices { display: grid; }
+.choice {
+  display: grid; gap: 2px; width: 100%; min-height: 68px; padding: 12px 2px; text-align: left;
+  background: none; border: 0; border-top: 1px solid var(--line); color: inherit; font: inherit;
+}
+.choice .t { font-weight: 600; font-size: 1.0625rem; }
+.choice .d { color: var(--ink-3); font-size: 0.875rem; }
+.choice[aria-pressed="true"] .t { color: var(--accent); }
+.choice:active { background: var(--sunken); }
+@keyframes sheet { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- study hub tiles ---------- */
+.cta-lg { justify-content: space-between; min-height: 64px; padding: 0 22px; font-size: 1.0625rem; margin-bottom: 16px; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; min-height: 124px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 20px; color: var(--ink); text-decoration: none;
+  transition: transform 120ms var(--ease);
+}
+.tile:active { transform: scale(0.97); }
+.tile .glyph { font: 500 1.875rem/1 var(--serif); letter-spacing: -0.02em; color: var(--ink); display: flex; }
+.tile .glyph svg.i { width: 30px; height: 30px; stroke-width: 1.6; }
+.tile .label { font-size: 0.9375rem; font-weight: 600; color: var(--ink-2); }
+.tile .count { position: absolute; top: 14px; right: 16px; font-size: 0.875rem; font-weight: 600; color: var(--accent); }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; min-height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.9375rem; }
+.pill .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14em; }
+.pill .num { color: var(--ink-3); font-weight: 500; font-size: 0.875rem; }
+.pill.hot .num { color: var(--accent); font-weight: 700; }
+
+/* ---------- stats dashboards ---------- */
+.dash { padding: 22px 0 26px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+.dash:first-of-type { border-top: 0; padding-top: 4px; }
+.dash-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.dash-head h2 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--ink-2); }
+.dash-head .big { margin: 0; font: 600 1.75rem/1.1 var(--sans); letter-spacing: -0.02em; }
+.cal { display: grid; gap: 6px; }
+.dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 0.75rem; color: var(--ink-3); }
+.heat { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.heat i { display: block; height: 30px; border-radius: 8px; background: var(--sunken); }
+.heat i.l1 { background: color-mix(in oklch, var(--accent) 28%, var(--sunken)); }
+.heat i.l2 { background: color-mix(in oklch, var(--accent) 50%, var(--sunken)); }
+.heat i.l3 { background: color-mix(in oklch, var(--accent) 75%, var(--sunken)); }
+.heat i.l4 { background: var(--accent); }
+.heat i.lx { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+svg.line { width: 100%; height: auto; overflow: visible; }
+svg.line .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+svg.line .trace { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+svg.line .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.dash .stack { margin-top: 6px; }
+.dash .legend { margin: 0; }
+dialog.sheet:focus { outline: none; }
