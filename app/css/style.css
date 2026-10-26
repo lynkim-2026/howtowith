@@ -330,3 +330,19 @@ dialog .actions { display: flex; gap: 8px; justify-content: flex-end; }
 .col-actions { display: grid; gap: 10px; margin-top: 24px; }
 
 @keyframes toast { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
+
+/* ---------- distilled screens ---------- */
+.hero { font: 600 2.75rem/1.1 var(--sans); letter-spacing: -0.035em; margin: 28px 0 6px; text-wrap: balance; }
+.hero-sub { margin: 0 0 28px; color: var(--ink-3); font-size: 1rem; }
+.home .bar { margin: -8px 0 24px; }
+.home .cta { margin-bottom: 20px; }
+.home .seg { margin-bottom: 20px; }
+.meta { margin: 0; color: var(--ink-3); font-size: 0.875rem; }
+.meta a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+.home .meta + .meta { margin-top: 6px; }
+.row .t { font-weight: 500; font-size: 1.0625rem; }
+.row .side { color: var(--ink-3); font-size: 0.9375rem; }
+.row .side.hot { color: var(--accent); font-weight: 600; }
+.axis span { min-height: 1em; }
+.row .chev { display: flex; }
+.bar + .meta { margin-top: 10px; }

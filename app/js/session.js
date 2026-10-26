@@ -97,10 +97,10 @@ export function sessionView(mode, cat) {
           : rec.en);
         clear(answerSlot, h('div', { class: 'answer' },
           en,
-          cmp ? h('p', { class: 'match' }, `일치율 ${Math.round(cmp.score * 100)}%`) : null,
-          cmp ? h('p', { class: 'typed' }, `내 답: ${typed}`) : null,
+          cmp && cmp.score < 1 ? h('p', { class: 'typed' }, `내 답: ${typed} (일치 ${Math.round(cmp.score * 100)}%)`) : null,
           listenRow(rec)));
         input.readOnly = true;
+        input.blur();
         if (S.settings.autoSpeak) say(rec);
       } else {
         clear(answerSlot, h('div', { class: 'answer' }, h('p', { class: 'a-ko' }, rec.ko)));

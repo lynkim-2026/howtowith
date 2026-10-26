@@ -25,7 +25,6 @@ export function homeView() {
   const o = overview(S.cards);
   if (!o.total) {
     return h('div', { class: 'view' },
-      h('h1', { class: 'page-title' }, 'Howtowith'),
       h('div', { class: 'empty' },
         h('h2', null, '아직 표현이 없어요'),
         h('p', null, 'PC에서 엑셀을 정리해 반영하면 앱을 열 때 자동으로 들어와요. 지금 바로 쓰려면 엑셀을 직접 올려도 돼요.'),
@@ -35,25 +34,21 @@ export function homeView() {
   const left = q.queue.length;
   const done = reviewedToday();
   const days = reviewDays(S.reviews);
-  const stale = !S.lastBackup || Date.now() - S.lastBackup > 7 * 86400000;
-  return h('div', { class: 'view' },
-    h('p', { class: 'brand' }, 'Howtowith'),
-    h('h1', { class: 'page-title' }, new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })),
-    h('div', { class: 'today' },
-      left
-        ? h('p', { class: 'big num' }, `${left}개`, h('small', null, `복습 ${q.due.length} · 새 표현 ${q.fresh.length}`))
-        : h('p', { class: 'big' }, '오늘 복습 끝', h('small', null, done ? `${done}번 복습했어요` : '쉬어가는 날이에요')),
-      h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round((done / Math.max(1, done + left)) * 100), 'aria-label': '오늘 진행률' },
-        h('i', { id: 'todaybar' })),
-      left
-        ? h('a', { class: 'btn primary block', href: '#/session/today' }, '오늘의 복습 시작')
-        : h('a', { class: 'btn block', href: '#/session/random' }, '랜덤 복습으로 더 하기')),
-    h('div', { class: 'section' }, h('h2', null, '출제 방향'), directionSeg()),
-    h('dl', { class: 'facts section' },
-      h('div', null, h('dt', null, '연속 학습'), h('dd', { class: 'num' }, `${streak(days)}일`)),
-      h('div', null, h('dt', null, '학습 완료율'), h('dd', { class: 'num' }, pct(o.completion))),
-      h('div', null, h('dt', null, '익숙한 표현'), h('dd', { class: 'num' }, `${o.mastered}개`))),
-    stale ? h('p', { class: 'notice' }, '학습 기록이 아직 백업되지 않았어요. ', h('a', { href: '#/data' }, '백업하기')) : null);
+  const stale = S.reviews.length > 0 && (!S.lastBackup || Date.now() - S.lastBackup > 7 * 86400000);
+  return h('div', { class: 'view home' },
+    h('h1', { class: 'hero' }, left ? `오늘 ${left}개` : '오늘 복습 끝'),
+    h('p', { class: 'hero-sub' }, left
+      ? `복습 ${q.due.length} · 새 표현 ${q.fresh.length}`
+      : (done ? `${done}번 복습했어요` : '쉬어가는 날이에요')),
+    done && left
+      ? h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round((done / (done + left)) * 100), 'aria-label': '오늘 진행률' }, h('i', { id: 'todaybar' }))
+      : null,
+    left
+      ? h('a', { class: 'btn primary block cta', href: '#/session/today' }, '복습 시작')
+      : h('a', { class: 'btn block cta', href: '#/session/random' }, '랜덤 복습으로 더 하기'),
+    directionSeg(),
+    h('p', { class: 'meta' }, `연속 ${streak(days)}일 · 완료 ${pct(o.completion)}`),
+    stale ? h('p', { class: 'meta' }, '아직 백업하지 않았어요 · ', h('a', { href: '#/data' }, '백업하기')) : null);
 }
 
 export function afterHome(root) {
@@ -69,34 +64,27 @@ export function studyView() {
   const cards = S.cards;
   const q = todayQueue(cards, { newLimit: S.settings.newPerDay, newToday: newToday() });
   const weak = weakQueue(cards).length;
-  const mode = (href, title, desc, badge) => h('li', null,
-    h('a', { class: 'row', href }, h('div', { class: 'grow' }, h('div', { class: 't' }, title), h('div', { class: 'd' }, desc)),
-      badge ? h('span', { class: 'badge due' }, badge) : null, h('span', { class: 'chev' }, icon('chevron'))));
+  const link = (href, title, meta, hot) => h('li', null,
+    h('a', { class: 'row', href },
+      h('span', { class: 'grow t' }, title),
+      meta ? h('span', { class: `side${hot ? ' hot' : ''}` }, meta) : null,
+      h('span', { class: 'chev' }, icon('chevron'))));
   const cats = categoryProgress(cards);
   return h('div', { class: 'view' },
     h('h1', { class: 'page-title' }, '복습'),
-    h('p', { class: 'page-sub' }, '방식을 골라 시작하세요.'),
     h('ul', { class: 'rows' },
-      mode('#/session/today', '오늘의 복습', '복습할 표현과 새 표현을 자동으로 골라요', q.queue.length ? `${q.queue.length}개` : null),
-      mode('#/session/ko-en', '한글 → 영어', '한국어를 보고 영어를 떠올려요 (직접 입력 가능)'),
-      mode('#/session/en-ko', '영어 → 한국어', '영어를 보고 뜻을 떠올려요'),
-      mode('#/session/random', '랜덤 복습', '저장된 표현에서 무작위로 20개'),
-      mode('#/session/weak', '틀린 표현 집중', '어려워했던 표현을 먼저', weak ? `${weak}개` : null)),
-    h('div', { class: 'section' },
-      h('h2', null, '카테고리별 학습'),
-      cats.length
-        ? h('ul', { class: 'rows' }, cats.map((c) => h('li', null,
-          h('a', { class: 'row', href: `#/session/cat/${encodeURIComponent(c.category)}` },
-            h('div', { class: 'grow' }, h('div', { class: 't' }, c.category),
-              h('div', { class: 'd num' }, `${c.learned}/${c.total} 학습`),
-              h('div', { class: 'bar' }, h('i', { class: 'fill', 'data-p': Math.round((c.learned / c.total) * 100) }))),
-            c.due ? h('span', { class: 'badge due' }, `${c.due}개 복습`) : null, h('span', { class: 'chev' }, icon('chevron'))))))
-        : h('p', { class: 'hint' }, '엑셀을 올리면 시트 이름이 카테고리가 돼요.')));
+      link('#/session/today', '오늘의 복습', q.queue.length ? `${q.queue.length}개` : '', true),
+      link('#/session/ko-en', '한글 → 영어'),
+      link('#/session/en-ko', '영어 → 한국어'),
+      link('#/session/random', '랜덤'),
+      link('#/session/weak', '틀린 표현 집중', weak ? `${weak}개` : '')),
+    cats.length ? h('div', { class: 'section' },
+      h('h2', null, '카테고리'),
+      h('ul', { class: 'rows' }, cats.map((c) =>
+        link(`#/session/cat/${encodeURIComponent(c.category)}`, c.category, c.due ? `복습 ${c.due}` : `${c.learned}/${c.total}`, !!c.due)))) : null);
 }
 
-export function afterStudy(root) {
-  for (const el of root.querySelectorAll('.fill')) el.style.width = `${el.dataset.p}%`;
-}
+export function afterStudy() {}
 
 /* ---------------- list ---------------- */
 const listState = { q: '', cat: '', limit: 100 };
@@ -182,39 +170,30 @@ export function statsView() {
   const ret = retention(S.reviews);
   const learning = S.cards.filter((c) => c.card.state === State.Learning || c.card.state === State.Relearning).length;
   const review = S.cards.filter((c) => c.card.state === State.Review && !isMastered(c)).length;
-  const parts = [
-    ['새 표현', o.fresh, 'var(--line)'], ['학습 중', learning, 'var(--hard)'],
-    ['복습 단계', review, 'var(--easy)'], ['익숙함', o.mastered, 'var(--good)'],
-  ];
   const cats = categoryProgress(S.cards);
   const total7 = daily.slice(-7).reduce((a, d) => a + d.count, 0);
+  const label = (d) => `${d.date.getMonth() + 1}/${d.date.getDate()}`;
+  const bar = h('i');
+  requestAnimationFrame(() => { bar.style.width = pct(o.completion); });
   return h('div', { class: 'view' },
-    h('h1', { class: 'page-title' }, '학습 통계'),
-    h('dl', { class: 'facts section' },
-      h('div', null, h('dt', null, '연속 학습'), h('dd', { class: 'num' }, `${streak(days)}일`)),
-      h('div', null, h('dt', null, '최장 기록'), h('dd', { class: 'num' }, `${bestStreak(days)}일`)),
-      h('div', null, h('dt', null, '기억 성공률'), h('dd', { class: 'num' }, ret == null ? '-' : pct(ret)))),
+    h('h1', { class: 'hero' }, `연속 ${streak(days)}일`),
+    h('p', { class: 'hero-sub' }, `최장 ${bestStreak(days)}일${ret == null ? '' : ` · 기억 성공률 ${pct(ret)}`}`),
     h('div', { class: 'section' },
-      h('h2', null, '최근 14일 복습'),
+      h('h2', null, '최근 14일'),
       h('div', { class: 'chart', role: 'img', 'aria-label': `최근 7일 ${total7}번 복습` },
         daily.map((d) => {
           const col = h('div', { class: `col${d.count ? '' : ' zero'}`, title: `${d.day} · ${d.count}번` }, h('i'));
           col.firstChild.style.setProperty('--h', `${Math.round((d.count / max) * 100)}%`);
           return col;
         })),
-      h('div', { class: 'axis' }, daily.map((d) => h('span', null, d.date.getDate() === 1 || d === daily[0] ? `${d.date.getMonth() + 1}/${d.date.getDate()}` : String(d.date.getDate()))))),
+      h('div', { class: 'axis' }, daily.map((d, i) => h('span', null, [0, 6, 13].includes(i) ? label(d) : '')))),
     h('div', { class: 'section' },
       h('h2', null, `학습 완료율 ${pct(o.completion)}`),
-      h('p', { class: 'hint' }, `전체 ${o.total}개 중 ${o.learned}개를 한 번 이상 학습했어요.`),
-      (() => {
-        const stack = h('div', { class: 'stack mt', role: 'img', 'aria-label': parts.map(([l, n]) => `${l} ${n}개`).join(', ') },
-          parts.map(([, n, c]) => { const i = h('i'); i.style.setProperty('--f', String(n)); i.style.setProperty('background', c); return i; }));
-        return stack;
-      })(),
-      h('ul', { class: 'legend' }, parts.map(([l, n, c]) => { const li = h('li', null, `${l} ${n}`); li.style.setProperty('--c', c); return li; }))),
-    h('div', { class: 'section' },
-      h('h2', null, '카테고리별'),
-      cats.length ? h('dl', { class: 'kv' }, cats.flatMap((c) => [h('dt', null, c.category), h('dd', { class: 'num' }, `${c.learned}/${c.total}`)])) : h('p', { class: 'hint' }, '아직 데이터가 없어요.')));
+      h('div', { class: 'bar' }, bar),
+      h('p', { class: 'meta' }, `새 ${o.fresh} · 학습 중 ${learning} · 복습 ${review} · 익숙 ${o.mastered}`)),
+    cats.length > 1 ? h('div', { class: 'section' },
+      h('h2', null, '카테고리'),
+      h('dl', { class: 'kv' }, cats.flatMap((c) => [h('dt', null, c.category), h('dd', { class: 'num' }, `${c.learned}/${c.total}`)]))) : null);
 }
 
 /* ---------------- data ---------------- */
