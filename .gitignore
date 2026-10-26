@@ -1,0 +1,5 @@
+node_modules/
+# personal study data stays local
+*.xlsx
+# Impeccable engine binary is downloaded on demand
+.claude/skills/impeccable/scripts/bin/
