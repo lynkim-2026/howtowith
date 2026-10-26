@@ -27,6 +27,9 @@
   --good-bg: oklch(94% 0.035 155);
   --easy-bg: oklch(94% 0.03 245);
   --shadow: 0 1px 2px oklch(30% 0.03 255 / 0.08), 0 8px 24px -12px oklch(30% 0.03 255 / 0.18);
+  --flame-a: oklch(64% 0.2 38);
+  --flame-b: oklch(77% 0.17 66);
+  --flame-c: oklch(95% 0.08 95);
 
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
@@ -59,6 +62,8 @@
     --good-bg: oklch(28% 0.04 155);
     --easy-bg: oklch(28% 0.04 245);
     --shadow: 0 1px 2px oklch(5% 0 0 / 0.4), 0 10px 28px -14px oklch(5% 0 0 / 0.6);
+    --flame-a: oklch(70% 0.2 42);
+    --flame-b: oklch(81% 0.16 70);
   }
 }
 
@@ -82,6 +87,8 @@
   --good-bg: oklch(28% 0.04 155);
   --easy-bg: oklch(28% 0.04 245);
   --shadow: 0 1px 2px oklch(5% 0 0 / 0.4), 0 10px 28px -14px oklch(5% 0 0 / 0.6);
+  --flame-a: oklch(70% 0.2 42);
+  --flame-b: oklch(81% 0.16 70);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -412,3 +419,56 @@ svg.line .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; 
 .dash .stack { margin-top: 6px; }
 .dash .legend { margin: 0; }
 dialog.sheet:focus { outline: none; }
+
+/* ---------- home: centered, with the streak flame ---------- */
+.home { text-align: center; }
+.home .date { margin-top: 20px; }
+.flame-stage { display: grid; justify-items: center; gap: 4px; margin: 8px 0 6px; }
+.streak { margin: 0; font: 600 1.25rem/1.3 var(--sans); letter-spacing: -0.01em; color: var(--ink-2); }
+.home .hero { font-size: 2.25rem; margin: 18px 0 4px; }
+.home .hero-sub { margin-bottom: 24px; }
+
+svg.flame { display: block; width: auto; overflow: visible; }
+svg.flame.lv0 { height: 96px; }
+svg.flame.lv1 { height: 112px; }
+svg.flame.lv2 { height: 132px; }
+svg.flame.lv3 { height: 152px; }
+svg.flame.lv4 { height: 172px; }
+svg.flame.lv5 { height: 196px; }
+.flame .glow { fill: var(--flame-a); opacity: 0; transform-box: fill-box; transform-origin: 50% 60%; }
+.flame.lv1 .glow { opacity: 0.1; }
+.flame.lv2 .glow { opacity: 0.14; }
+.flame.lv3 .glow { opacity: 0.2; }
+.flame.lv4 .glow { opacity: 0.28; }
+.flame.lv5 .glow { opacity: 0.38; }
+.flame:not(.lv0) .glow { animation: glow 2.6s ease-in-out infinite; filter: blur(14px); }
+.flame .layer, .flame .tongue { transform-box: fill-box; transform-origin: 50% 100%; }
+.flame .outer { fill: var(--flame-a); }
+.flame .mid { fill: var(--flame-b); }
+.flame .core { fill: var(--flame-c); }
+.flame .tongue { fill: var(--flame-a); opacity: 0.85; }
+.flame:not(.lv0) .outer { animation: flick-a 1.5s ease-in-out infinite; }
+.flame:not(.lv0) .mid { animation: flick-b 1.1s ease-in-out infinite; }
+.flame:not(.lv0) .core { animation: flick-c 0.8s ease-in-out infinite; }
+.flame .t1 { animation: flick-b 1.3s ease-in-out infinite 0.2s; }
+.flame .t2 { animation: flick-a 1.7s ease-in-out infinite 0.5s; }
+.flame:not(.lv0) .body { animation: sway 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.flame.lv0 .outer { fill: var(--line); }
+.flame.lv0 .mid { fill: var(--sunken); }
+.flame.lv0 .core { fill: var(--line); opacity: 0.6; }
+.flame.lv5 .outer { animation-duration: 1.1s; }
+.flame.lv5 .mid { animation-duration: 0.8s; }
+.flame .spark { fill: var(--flame-b); opacity: 0; animation: rise 2.6s ease-out infinite; }
+.flame .sp1 { animation-delay: 0s; }
+.flame .sp2 { animation-delay: 0.6s; }
+.flame .sp3 { animation-delay: 1.2s; }
+.flame .sp4 { animation-delay: 1.8s; }
+.flame .sp5 { animation-delay: 0.3s; animation-duration: 3s; }
+.flame .sp6 { animation-delay: 1.5s; animation-duration: 3s; }
+@keyframes flick-a { 0%, 100% { transform: scale(1, 1) skewX(0deg); } 25% { transform: scale(0.96, 1.05) skewX(-2deg); } 55% { transform: scale(1.03, 0.97) skewX(2deg); } 80% { transform: scale(0.98, 1.04) skewX(-1deg); } }
+@keyframes flick-b { 0%, 100% { transform: scale(1, 1); } 30% { transform: scale(1.04, 0.95) skewX(2deg); } 60% { transform: scale(0.95, 1.06) skewX(-2deg); } }
+@keyframes flick-c { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(0.92, 1.1); } }
+@keyframes sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+@keyframes glow { 0%, 100% { transform: scale(0.94); } 50% { transform: scale(1.08); } }
+@keyframes rise { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 12% { opacity: 0.95; } 100% { transform: translate(var(--drift, 6px), -78px) scale(0.3); opacity: 0; } }
+.flame .sp2, .flame .sp4, .flame .sp6 { --drift: -8px; }

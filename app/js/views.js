@@ -7,6 +7,7 @@ import { todayQueue, weakQueue, isNew, isDue, isMastered, State, dayKey } from '
 import { overview, streak, bestStreak, reviewDays, retention, categoryProgress, heatmap, accuracySeries, forecast, stages } from './stats.js';
 import { readWorkbook, extractSheets } from './importer.js';
 import { serialize, parseBackup } from './backup.js';
+import { flame } from './flame.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 const speakCard = (c) => tts.speak({ key: c.key, text: c.en }, { rate: S.settings.rate, repeat: 1, voiceURI: S.settings.voiceURI });
@@ -41,9 +42,11 @@ export function homeView() {
   const streakDays = streak(reviewDays(S.reviews));
   const stale = S.reviews.length > 0 && (!S.lastBackup || Date.now() - S.lastBackup > 7 * 86400000);
   const title = done ? (left ? `오늘 ${done}개 학습` : '오늘 학습 끝') : '오늘 학습 전';
-  const sub = [left ? `남은 표현 ${left}개` : (done ? '내일 또 만나요' : '쉬어가는 날이에요'), streakDays ? `연속 ${streakDays}일째` : ''].filter(Boolean).join(' · ');
+  const sub = left ? `남은 표현 ${left}개` : (done ? '내일 또 만나요' : '쉬어가는 날이에요');
+  const streakLabel = streakDays ? `${streakDays}일 연속` : '오늘 불을 붙여 보세요';
   return h('div', { class: 'view home' },
     h('p', { class: 'date' }, new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })),
+    h('div', { class: 'flame-stage' }, flame(streakDays), h('p', { class: 'streak num' }, streakLabel)),
     h('h1', { class: 'hero' }, title),
     h('p', { class: 'hero-sub' }, sub),
     done && left

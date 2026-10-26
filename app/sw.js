@@ -5,7 +5,7 @@ const AUDIO = 'howtowith-audio-v1';
 
 const SHELL_FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'fonts/newsreader.woff2',
-  'js/app.js', 'js/backup.js', 'js/db.js', 'js/importer.js', 'js/session.js', 'js/srs.js',
+  'js/app.js', 'js/backup.js', 'js/db.js', 'js/flame.js', 'js/importer.js', 'js/session.js', 'js/srs.js',
   'js/state.js', 'js/stats.js', 'js/text.js', 'js/tts.js', 'js/ui.js', 'js/views.js',
   'vendor/ts-fsrs.mjs', 'vendor/read-excel-file.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',

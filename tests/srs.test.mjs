@@ -64,6 +64,10 @@ const sg = stages(cards);
 assert.equal(sg.fresh, 2);
 assert.equal(sg.fresh + sg.learning + sg.review + sg.mastered, 4);
 
+// Flame level grows with the streak
+import { flameLevel } from '../app/js/flame.js';
+assert.deepEqual([0, 1, 2, 3, 6, 7, 13, 14, 29, 30, 100].map(flameLevel), [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]);
+
 // Backup round-trip and hostile input
 const text = serialize({ cards, reviews: reviews.map((x, i) => ({ ...x, key: 'a', ts: i, mode: 'today' })), settings: { rate: 9, theme: 'x' } });
 const back = parseBackup(text);

@@ -14,6 +14,10 @@ English sentences are the content, set in Newsreader (self-hosted variable serif
 
 One column, max 560px, 20px gutters, bottom tab bar (홈 · 복습 · 목록 · 통계 · 관리) with safe-area padding. Lists are hairline-separated rows, not stacked cards; status is quiet meta text under the sentence, not a badge. Listening controls (듣기 · 0.8× · 반복) sit with the sentence as text buttons. Settings are folded into disclosure rows so the Data screen stays short; there is one primary action per screen. Study sessions hide the tab bar. The home screen is one statement (today's study and streak) and one button; choosing how to study happens in a bottom sheet after the tap, not in always-visible menus. The Study tab is a few icon tiles, not a text list. Stats are three dashboards: consistency (5-week calendar), memory (daily remember-rate line), and what is ahead (7-day forecast and stage mix).
 
+## Streak flame
+
+The home screen centers a flame drawn in SVG (outer, mid and core layers) that flickers with CSS keyframes. Its strength follows the streak: embers at 0 days, then 1–2, 3–6 (side tongue), 7–13 (sparks), 14–29 (second tongue, bigger glow), 30+ (largest, six sparks). Colors are the --flame tokens; reduced motion freezes it.
+
 ## Motion
 
 One authored moment per surface: views rise in (320ms, exponential ease-out), the answer reveals with a clip-path wipe, progress bars ease to value. `prefers-reduced-motion` collapses all of it.
