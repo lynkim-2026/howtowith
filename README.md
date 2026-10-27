@@ -48,7 +48,7 @@ npm test
 
 ## 영어 음성 만들기 (VoiceStudio, PC에서만)
 
-음성은 **PC에서 한 번 생성**하고 앱은 재생만 합니다. 새 문장을 추가하면 **없는 문장만** 생성합니다.
+음성은 **PC에서 한 번 생성**하고 앱은 재생만 합니다. 문장마다 **3가지 목소리**(여성 / 남성 / 저음 남성, 모두 미국 영어)로 만들며, 앱의 학습 카드(`목소리` 버튼)와 관리 화면에서 골라 들을 수 있습니다. 새 문장을 추가하면 **없는 문장·목소리만** 생성합니다. 목소리는 `scripts/make-audio.mjs`의 `VOICES`(OmniVoice 음성 설계 태그 + 고정 seed)에서 바꿀 수 있습니다.
 
 1. VoiceStudio 설치 (설치·모델 다운로드 약 10GB, 설치 전 확인 필요): <https://github.com/debpalash/VoiceStudio>
    - 권장: NVIDIA GPU VRAM 6GB↑ (CPU도 가능하나 느림), 디스크 여유 10GB↑, Windows 10/11 x64

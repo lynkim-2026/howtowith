@@ -10,7 +10,7 @@ import { serialize, parseBackup } from './backup.js';
 import { flame } from './flame.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
-const speakCard = (c) => tts.speak({ key: c.key, text: c.en }, { rate: S.settings.rate, repeat: 1, voiceURI: S.settings.voiceURI });
+const speakCard = (c) => tts.speak({ key: c.key, text: c.en }, { rate: S.settings.rate, repeat: 1, voiceURI: S.settings.voiceURI, audioVoice: S.settings.audioVoice });
 
 const DIRECTIONS = [
   { value: 'ko-en', label: '한글 → 영어', desc: '한국어를 보고 영어를 떠올려요' },
@@ -367,6 +367,20 @@ export function dataView() {
     return seg;
   };
 
+  function voiceSeg() {
+    const list = tts.audioVoices();
+    const seg = h('div', { class: 'seg', role: 'group', 'aria-label': '목소리' });
+    const active = () => (list.find((x) => x.id === S.settings.audioVoice) || list[0]).id;
+    const paint = () => clear(seg, list.map((x) => h('button', { type: 'button', 'aria-pressed': active() === x.id, onclick: async () => {
+      await updateSettings({ audioVoice: x.id });
+      paint();
+      const sample = S.cards.find((c) => tts.hasAudio(c.key));
+      if (sample) speakCard(sample);
+    } }, x.label)));
+    paint();
+    return seg;
+  }
+
   persist();
   const installBtn = S.installEvent
     ? h('button', { class: 'btn block', type: 'button', onclick: async () => { S.installEvent.prompt(); await S.installEvent.userChoice; S.installEvent = null; installBtn.remove(); } }, '홈 화면에 설치')
@@ -390,6 +404,7 @@ export function dataView() {
       audioStatus,
       tts.audioCount() ? h('button', { class: 'btn block', type: 'button', onclick: (e) => cacheAudio(e.currentTarget) }, '음성 오프라인 저장') : null,
       tts.audioCount() ? h('p', { class: 'hint' }, '음성: VoiceStudio(AGPL-3.0) · OmniVoice 모델(CC-BY-NC, 비상업 개인 학습용)') : null,
+      tts.audioVoices().length > 1 ? setting('목소리', voiceSeg(), '누르면 바로 들어볼 수 있어요.') : null,
       setting('기본 재생 속도', segOf('rate', [[0.8, '0.8×'], [1, '1×']])),
       setting('반복 횟수', segOf('repeat', [[1, '1번'], [2, '2번'], [3, '3번']])),
       h('div', { class: 'switch' }, h('label', { for: 'auto' }, '자동 재생'),

@@ -472,3 +472,4 @@ svg.flame.lv5 { height: 196px; }
 @keyframes glow { 0%, 100% { transform: scale(0.94); } 50% { transform: scale(1.08); } }
 @keyframes rise { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 12% { opacity: 0.95; } 100% { transform: translate(var(--drift, 6px), -78px) scale(0.3); opacity: 0; } }
 .flame .sp2, .flame .sp4, .flame .sp6 { --drift: -8px; }
+dialog.sheet h2:focus { outline: none; }

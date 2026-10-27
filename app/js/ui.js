@@ -86,9 +86,9 @@ export function ask(title, message, choices) {
 // Bottom sheet with a few large choices. Resolves the chosen value, or null when dismissed.
 export function sheet(title, options, current) {
   return new Promise((resolve) => {
-    const dlg = h('dialog', { class: 'sheet', 'aria-label': title, tabindex: '-1', autofocus: true },
+    const dlg = h('dialog', { class: 'sheet', 'aria-label': title },
       h('div', { class: 'body' },
-        h('h2', null, title),
+        h('h2', { tabindex: '-1', autofocus: true }, title),
         h('div', { class: 'choices' }, options.map((o) =>
           h('button', { class: 'choice', type: 'button', 'aria-pressed': o.value === current, onclick: () => { resolve(o.value); dlg.close(); } },
             h('span', { class: 't' }, o.label),

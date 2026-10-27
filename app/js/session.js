@@ -1,6 +1,6 @@
 // Review session: question -> reveal -> rate (Again / Hard / Good / Easy).
-import { S, rate, newToday } from './state.js';
-import { h, clear, icon, fmtInterval } from './ui.js';
+import { S, rate, newToday, updateSettings } from './state.js';
+import { h, clear, icon, sheet, fmtInterval } from './ui.js';
 import * as tts from './tts.js';
 import { Rating, GRADES, GRADE_LABEL, preview, todayQueue, fillQueue, weakQueue, randomQueue, categoryQueue } from './srs.js';
 import { compareAnswer } from './text.js';
@@ -55,14 +55,30 @@ export function sessionView(mode, cat) {
   }
 
   const say = (rec, rateOverride) => tts.speak({ key: rec.key, text: rec.en }, {
-    rate: rateOverride ?? S.settings.rate, repeat: S.settings.repeat, voiceURI: S.settings.voiceURI,
+    rate: rateOverride ?? S.settings.rate, repeat: S.settings.repeat, voiceURI: S.settings.voiceURI, audioVoice: S.settings.audioVoice,
   });
+
+  const currentVoice = () => {
+    const list = tts.audioVoices();
+    return list.find((v) => v.id === S.settings.audioVoice) || list[0];
+  };
+  async function pickVoice(rec, btn) {
+    const list = tts.audioVoices();
+    const id = await sheet('목소리 선택', list.map((v) => ({ value: v.id, label: v.label, desc: v.desc })), currentVoice().id);
+    if (!id) return;
+    await updateSettings({ audioVoice: id });
+    btn.textContent = currentVoice().label;
+    say(rec, 1);
+  }
 
   function listenRow(rec) {
     return h('div', { class: 'listen' },
       h('button', { class: 'btn', type: 'button', onclick: () => say(rec, 1) }, icon('speaker'), '듣기'),
       h('button', { class: 'btn', type: 'button', onclick: () => say(rec, 0.8) }, '0.8×'),
-      h('button', { class: 'btn', type: 'button', 'aria-pressed': S.settings.repeat > 1, onclick: toggleLoop }, icon('repeat'), '반복'));
+      h('button', { class: 'btn', type: 'button', 'aria-pressed': S.settings.repeat > 1, onclick: toggleLoop }, icon('repeat'), '반복'),
+      tts.hasAudio(rec.key) && tts.audioVoices().length > 1
+        ? h('button', { class: 'btn', type: 'button', 'aria-label': '목소리 바꾸기', onclick: (e) => pickVoice(rec, e.currentTarget) }, currentVoice().label)
+        : null);
   }
 
   function progress() {

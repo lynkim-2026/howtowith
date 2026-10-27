@@ -1,26 +1,31 @@
-// English audio. Pre-generated files (made on the PC with VoiceStudio) play first;
-// when a file is missing or fails, the device's built-in Web Speech voice is used.
+// English audio. Pre-generated files (made on the PC with VoiceStudio, in several voices) play
+// first; when a file is missing or fails, the device's built-in Web Speech voice is used.
+import { parseAudioIndex } from './audio-index.js';
 
 const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
 let voices = [];
-let index = {}; // expression key -> file name under audio/
+let idx = parseAudioIndex(null);
 let runId = 0;
 let player = null;
 
-export const supported = () => !!synth || Object.keys(index).length > 0;
-export const hasAudio = (key) => Object.hasOwn(index, key);
-export const audioCount = () => Object.keys(index).length;
-export const audioFiles = () => Object.values(index).map((f) => `audio/${f}`);
+export const supported = () => !!synth || audioCount() > 0;
+export const hasAudio = (key) => Object.hasOwn(idx.items, key);
+export const audioCount = () => Object.keys(idx.items).length;
+export const audioVoices = () => idx.voices;
+export const audioFiles = () => Object.values(idx.items).flatMap((e) => Object.values(e)).map((f) => `audio/${f}`);
+
+// The chosen voice if it exists for this expression, else the first available one.
+function fileFor(key, voiceId) {
+  const e = idx.items[key];
+  if (!e) return null;
+  return e[voiceId] || e[idx.voices[0]?.id] || Object.values(e)[0] || null;
+}
 
 export async function loadIndex() {
   try {
     const res = await fetch('audio/index.json', { cache: 'no-cache' });
     if (!res.ok) return;
-    const data = await res.json();
-    index = {};
-    for (const [k, f] of Object.entries(data)) {
-      if (typeof f === 'string' && /^[a-z0-9_-]+\.(mp3|wav|ogg)$/i.test(f)) index[k] = f;
-    }
+    idx = parseAudioIndex(await res.json());
   } catch { /* offline without a cached index, or no audio generated yet */ }
 }
 
@@ -49,7 +54,7 @@ export function stop() {
   if (player) { player.pause(); player.removeAttribute('src'); player.load(); player = null; }
 }
 
-// Plays `repeat` times; resolves the callback once finished or stopped.
+// Plays `repeat` times; calls onEnd once finished or on failure.
 function speakSynth(text, { rate, repeat, voiceURI, onEnd }, id) {
   if (!synth) { onEnd?.(); return; }
   let n = 0;
@@ -69,8 +74,8 @@ function speakSynth(text, { rate, repeat, voiceURI, onEnd }, id) {
   next();
 }
 
-function speakFile(item, opts, id) {
-  const audio = new Audio(`audio/${index[item.key]}`);
+function speakFile(item, file, opts, id) {
+  const audio = new Audio(`audio/${file}`);
   audio.preservesPitch = true;
   audio.playbackRate = opts.rate;
   player = audio;
@@ -96,12 +101,13 @@ function speakFile(item, opts, id) {
   play();
 }
 
-// speak({ key, text }, { rate, repeat, voiceURI, onEnd })
-export function speak(item, { rate = 1, repeat = 1, voiceURI = '', onEnd } = {}) {
+// speak({ key, text }, { rate, repeat, voiceURI, audioVoice, onEnd })
+export function speak(item, { rate = 1, repeat = 1, voiceURI = '', audioVoice = '', onEnd } = {}) {
   if (!item || !item.text) return;
   stop();
   const id = runId;
   const opts = { rate, repeat, voiceURI, onEnd };
-  if (hasAudio(item.key)) speakFile(item, opts, id);
+  const file = fileFor(item.key, audioVoice);
+  if (file) speakFile(item, file, opts, id);
   else speakSynth(item.text, opts, id);
 }

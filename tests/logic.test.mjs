@@ -50,3 +50,18 @@ let e = bomb.length - 22; while (dv.getUint32(e, true) !== 0x06054b50) e--;
 dv.setUint32(dv.getUint32(e + 16, true) + 24, 0x7fffffff, true);
 assert.throws(() => checkZipSize(bomb), /너무 큰/);
 console.log('zip guard ok');
+
+// audio index: v2 validation, legacy v1, hostile input
+import { parseAudioIndex } from '../app/js/audio-index.js';
+const good = parseAudioIndex({ version: 2, voices: [{ id: 'f1', label: '여성', desc: 'x' }, { id: 'BAD ID', label: 'no' }], items: { 'hello': { f1: 'abc123.mp3', zz: 'abc.mp3' }, 'a': { f1: '../evil.mp3' } } });
+assert.equal(good.voices.length, 1);
+assert.deepEqual(Object.keys(good.items), ['hello']);
+assert.deepEqual(Object.keys(good.items.hello), ['f1']);
+const legacy = parseAudioIndex({ 'hello': 'abc.mp3', 'x': 'http://evil/x.mp3' });
+assert.equal(legacy.voices[0].id, 'default');
+assert.deepEqual(Object.keys(legacy.items), ['hello']);
+const proto = parseAudioIndex(JSON.parse('{"version":2,"voices":[{"id":"f1","label":"a"}],"items":{"__proto__":{"f1":"x.mp3"},"ok":{"f1":"y.mp3"}}}'));
+assert.equal(({}).f1, undefined);
+assert.equal(Object.getPrototypeOf(proto.items), null);
+assert.deepEqual(parseAudioIndex(null).voices, []);
+console.log('audio index ok');

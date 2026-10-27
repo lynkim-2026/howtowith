@@ -98,7 +98,7 @@ export function parseBackup(text) {
 }
 
 export const DEFAULT_SETTINGS = {
-  theme: 'auto', newPerDay: 10, direction: 'ko-en', rate: 1, repeat: 1, voiceURI: '', autoSpeak: false,
+  theme: 'auto', newPerDay: 10, direction: 'ko-en', rate: 1, repeat: 1, voiceURI: '', autoSpeak: false, audioVoice: '',
 };
 
 export function cleanSettings(s = {}) {
@@ -111,6 +111,7 @@ export function cleanSettings(s = {}) {
     repeat: int(s.repeat, 1, 10, d.repeat),
     voiceURI: str(s.voiceURI, 200),
     autoSpeak: s.autoSpeak === true,
+    audioVoice: typeof s.audioVoice === 'string' && /^[a-z0-9]{0,12}$/.test(s.audioVoice) ? s.audioVoice : d.audioVoice,
   };
 }
 
