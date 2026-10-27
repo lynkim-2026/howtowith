@@ -2,76 +2,92 @@
  "version": 2,
  "voices": [
   {
-   "id": "f1",
-   "label": "여성",
-   "desc": "젊은 성인 · 미국 영어"
+   "id": "uf",
+   "label": "미국 여성",
+   "desc": "중년 · 미국 영어"
   },
   {
-   "id": "m1",
-   "label": "남성",
-   "desc": "젊은 성인 · 미국 영어"
+   "id": "um",
+   "label": "미국 남성",
+   "desc": "중년 · 미국 영어"
   },
   {
-   "id": "m2",
-   "label": "저음 남성",
-   "desc": "중년 · 낮은 음 · 미국 영어"
+   "id": "bf",
+   "label": "영국 여성",
+   "desc": "중년 · 영국 영어"
+  },
+  {
+   "id": "bm",
+   "label": "영국 남성",
+   "desc": "중년 · 영국 영어"
   }
  ],
  "items": {
   "here in new york": {
-   "f1": "82e5e8470420d845.mp3",
-   "m1": "2bbe3ca3e91db7cf.mp3",
-   "m2": "23a080d121213800.mp3"
+   "uf": "ded88f6aaa9267fd.mp3",
+   "um": "aa7f293dd6b46058.mp3",
+   "bf": "f8ba385d79fdbc37.mp3",
+   "bm": "40ae9558b140a05b.mp3"
   },
   "life is filled with precious moments ones that we wish we could hang on to forever": {
-   "f1": "c6a1a477210dc7e2.mp3",
-   "m1": "d9c3eaa889a821b9.mp3",
-   "m2": "113a83c7ed25944c.mp3"
+   "uf": "e0f941814f2e5a5c.mp3",
+   "um": "29ceab1e9b54697c.mp3",
+   "bf": "cd26d18ff33c9c0b.mp3",
+   "bm": "edcdd5401f5eb9b6.mp3"
   },
   "but our ability to recall everything no matter how much it means to us gets worse and worse over time": {
-   "f1": "8e4e67ecafaa4fb1.mp3",
-   "m1": "572b5d9daba8ff5c.mp3",
-   "m2": "8fbbe15bd2a22cbd.mp3"
+   "uf": "2f1e4fbab4dad79e.mp3",
+   "um": "fb22c0c57ddb29a6.mp3",
+   "bf": "36d9c75201b893d9.mp3",
+   "bm": "859507459550bb49.mp3"
   },
   "and if you dont have an accurate record you may never be able to trust your own version of events": {
-   "f1": "654455a897a937b7.mp3",
-   "m1": "a187b755cdba4517.mp3",
-   "m2": "f61f8bece1ac9087.mp3"
+   "uf": "3f2e00d050fc2390.mp3",
+   "um": "49fb276802181f68.mp3",
+   "bf": "ac7714c76d470d89.mp3",
+   "bm": "06618587a271d9e8.mp3"
   },
   "then youll just end up remembering things someone else wants you to": {
-   "f1": "aa4fa08e546c4e31.mp3",
-   "m1": "fd3606d84c5e4797.mp3",
-   "m2": "722b0a56944a6ca5.mp3"
+   "uf": "abb07c6959d63dd9.mp3",
+   "um": "a431d64cfb2a9d34.mp3",
+   "bf": "1a6ca31ed3c5a7b1.mp3",
+   "bm": "a4463a07a255a942.mp3"
   },
   "but it doesnt have to be this way so stick with me": {
-   "f1": "45e2f196aeb0af5e.mp3",
-   "m1": "176de2e14493b82a.mp3",
-   "m2": "9ab484812a0fc063.mp3"
+   "uf": "cdf1ba60ab91e04a.mp3",
+   "um": "36d048b16b49f051.mp3",
+   "bf": "cfc0767796035083.mp3",
+   "bm": "97465411d0343114.mp3"
   },
   "ill show you how to turn every waking moment into something thats impossible to forget": {
-   "f1": "09f788fc0f30e5fc.mp3",
-   "m1": "53757d7368ea07ed.mp3",
-   "m2": "a8b736278cab1414.mp3"
+   "uf": "b5a1a316e5e27e62.mp3",
+   "um": "ab4a8b9ecfbf050e.mp3",
+   "bf": "f5b3a8bf652de2be.mp3",
+   "bm": "b6f4d67a66723492.mp3"
   },
   "a good memory is one of the most attractive qualities that people can have": {
-   "f1": "f39f85e529300a62.mp3",
-   "m1": "32831e5a2d163b48.mp3",
-   "m2": "ac2189a9c1ceb65d.mp3"
+   "uf": "b66f7ee0c9b68ee6.mp3",
+   "um": "72e6eafccda9c0d2.mp3",
+   "bf": "16bdc93671cee674.mp3",
+   "bm": "6477cc19855ee477.mp3"
   },
   "my memory is not very good and it always made me feel insecure": {
-   "f1": "a845bdd2f45fb3c0.mp3",
-   "m1": "68408e0505ee706e.mp3",
-   "m2": "e0ba96eb31849395.mp3"
+   "uf": "350a12fe803ff0be.mp3",
+   "um": "223d3cff6544bf8a.mp3",
+   "bf": "7881a2060ecdadaf.mp3",
+   "bm": "c13bcc21484c788f.mp3"
   },
   "its kind of why i started to shoot so much video": {
-   "f1": "2948d783b60ab7cf.mp3",
-   "m1": "ebf4d35220b1b92a.mp3",
-   "m2": "2e8548e0447ef05f.mp3"
+   "uf": "9a638e2d943e9a10.mp3",
+   "um": "cf3d19e14e230491.mp3",
+   "bf": "e2b28421d4b5eda7.mp3",
+   "bm": "8bf2ccf20da98fb0.mp3"
   },
   "as possible writing down every single thing i do every single day for decades now": {
-   "f1": "26f19fd326e58da4.mp3",
-   "m1": "b718b1a4dbdb0c7a.mp3",
-   "m2": "7373c64e3da40c82.mp3"
+   "uf": "628c378b12ca151a.mp3",
+   "um": "b9de804acc76024c.mp3",
+   "bf": "868fa021c3d6b993.mp3",
+   "bm": "6283647964987411.mp3"
   }
  }
 }

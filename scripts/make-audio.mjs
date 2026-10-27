@@ -14,9 +14,10 @@ import { readWorkbook, extractSheets } from '../app/js/importer.js';
 // Voices offered in the app. `instruct` uses OmniVoice's voice-design tags (gender, age, pitch,
 // accent); the fixed `seed` keeps each voice stable from one sentence to the next.
 export const VOICES = [
-  { id: 'f1', label: '여성', desc: '젊은 성인 · 미국 영어', instruct: 'female, young adult, moderate pitch, american accent', seed: 11 },
-  { id: 'm1', label: '남성', desc: '젊은 성인 · 미국 영어', instruct: 'male, young adult, moderate pitch, american accent', seed: 22 },
-  { id: 'm2', label: '저음 남성', desc: '중년 · 낮은 음 · 미국 영어', instruct: 'male, middle-aged, low pitch, american accent', seed: 33 },
+  { id: 'uf', label: '미국 여성', desc: '중년 · 미국 영어', instruct: 'female, middle-aged, moderate pitch, american accent', seed: 11 },
+  { id: 'um', label: '미국 남성', desc: '중년 · 미국 영어', instruct: 'male, middle-aged, moderate pitch, american accent', seed: 22 },
+  { id: 'bf', label: '영국 여성', desc: '중년 · 영국 영어', instruct: 'female, middle-aged, moderate pitch, british accent', seed: 33 },
+  { id: 'bm', label: '영국 남성', desc: '중년 · 영국 영어', instruct: 'male, middle-aged, moderate pitch, british accent', seed: 44 },
 ];
 
 const args = process.argv.slice(2);
@@ -43,7 +44,13 @@ function loadIndex() {
   const old = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
   if (old.version !== 2) return { index: empty, migrated: Object.keys(old).length > 0 }; // legacy single-voice files are replaced
   old.voices = empty.voices;
-  return { index: old, migrated: false };
+  const keep = new Set(VOICES.map((v) => v.id));
+  let pruned = false;
+  for (const [key, entry] of Object.entries(old.items)) {
+    for (const id of Object.keys(entry)) if (!keep.has(id)) { delete entry[id]; pruned = true; }
+    if (!Object.keys(entry).length) delete old.items[key];
+  }
+  return { index: old, migrated: pruned };
 }
 
 async function main() {

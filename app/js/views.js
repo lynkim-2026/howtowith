@@ -367,18 +367,19 @@ export function dataView() {
     return seg;
   };
 
+  // Five voices do not fit a segmented control: a row that opens the same sheet as the study card.
   function voiceSeg() {
     const list = tts.audioVoices();
-    const seg = h('div', { class: 'seg', role: 'group', 'aria-label': '목소리' });
-    const active = () => (list.find((x) => x.id === S.settings.audioVoice) || list[0]).id;
-    const paint = () => clear(seg, list.map((x) => h('button', { type: 'button', 'aria-pressed': active() === x.id, onclick: async () => {
-      await updateSettings({ audioVoice: x.id });
-      paint();
+    const current = () => list.find((x) => x.id === S.settings.audioVoice) || list[0];
+    const label = h('span', null, current().label);
+    return h('button', { class: 'btn block between', type: 'button', 'aria-label': '목소리', onclick: async () => {
+      const id = await sheet('목소리 선택', list.map((x) => ({ value: x.id, label: x.label, desc: x.desc })), current().id);
+      if (!id) return;
+      await updateSettings({ audioVoice: id });
+      label.textContent = current().label;
       const sample = S.cards.find((c) => tts.hasAudio(c.key));
       if (sample) speakCard(sample);
-    } }, x.label)));
-    paint();
-    return seg;
+    } }, label, icon('chevron'));
   }
 
   persist();
@@ -404,7 +405,7 @@ export function dataView() {
       audioStatus,
       tts.audioCount() ? h('button', { class: 'btn block', type: 'button', onclick: (e) => cacheAudio(e.currentTarget) }, '음성 오프라인 저장') : null,
       tts.audioCount() ? h('p', { class: 'hint' }, '음성: VoiceStudio(AGPL-3.0) · OmniVoice 모델(CC-BY-NC, 비상업 개인 학습용)') : null,
-      tts.audioVoices().length > 1 ? setting('목소리', voiceSeg(), '누르면 바로 들어볼 수 있어요.') : null,
+      tts.audioVoices().length > 1 ? setting('목소리', voiceSeg(), '고르면 바로 들어볼 수 있어요.') : null,
       setting('기본 재생 속도', segOf('rate', [[0.8, '0.8×'], [1, '1×']])),
       setting('반복 횟수', segOf('repeat', [[1, '1번'], [2, '2번'], [3, '3번']])),
       h('div', { class: 'switch' }, h('label', { for: 'auto' }, '자동 재생'),
